@@ -2,6 +2,7 @@ import argparse
 from pathlib import Path
 
 import pandas as pd
+import os
 
 
 def unpack_data(input_dir: str, output_file: str) -> None:
@@ -26,11 +27,32 @@ def unpack_data(input_dir: str, output_file: str) -> None:
     4. Concatenate all DataFrames
     5. Save the combined DataFrame to output_file
     """
-    input_path = Path(input_dir)
-    output_path = Path(output_file)
+    all_csv_files = get_all_files(input_dir)
+    final_dataframe = concatenate_csv(all_csv_files)
+    final_dataframe.to_csv(output_file)
 
-    # TODO: implement the unpacking logic
-    pass
+
+def get_all_files(path):
+    """
+        Creates a list of all csv files in the directory recursively
+    """
+    res = []
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            res.append(os.path.join(root, file))
+    return res
+
+def concatenate_csv(files_list):
+    """
+        Reads each CSV in the file, creates a dataframe and concatenates all the dataframes
+    """
+    final_dataframe = pd.DataFrame()
+
+    for file in files_list:
+        df = pd.read_csv(Path(file))
+        final_dataframe = pd.concat([final_dataframe, df])
+    
+    return final_dataframe
 
 
 if __name__ == "__main__":
